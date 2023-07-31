@@ -124,39 +124,36 @@ def Scheme(design):
 
 
 if __name__ == '__main__':
-    net = [0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0]
-    design = translator(net)
-    best_model, report = Scheme(design)
-    # train_space = []
-    # if os.path.isfile('train_space_tmp') == True:
-    #     filename = 'train_space_tmp'
-    # else:
-    #     filename = 'data/train_space_1'
+    # net = [0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0]
+    # design = translator(net)
+    # best_model, report = Scheme(design)
+    train_space = []
+    if os.path.isfile('train_space_tmp') == True:
+        filename = 'train_space_tmp'
+    else:
+        filename = 'data/train_space_1'
 
-    # with open(filename, 'rb') as file:
-    #     train_space = pickle.load(file)
+    with open(filename, 'rb') as file:
+        train_space = pickle.load(file)
 
-    # if os.path.isfile('results.csv') == False:
-    #     with open('train_results.csv', 'w+', newline='') as res:
-    #             writer = csv.writer(res)
-    #             writer.writerow(['sample_id', 'arch_code', 'val_loss', 'test_mae', 'test_corr',
-    #                             'test_multi_acc', 'test_bi_acc', 'test_f1'])
-    # i = 0
-    # while len(train_space) > 0:
-    #     net = train_space[0]
-    #     print('Net', i, ":", net)
-    #     design = translator(net)
-    #     best_model, report = Scheme(design)
-    #     with open('train_results.csv', 'a+', newline='') as res:
-    #         writer = csv.writer(res)
-    #         best_val_loss = report['best_val_loss']
-    #         metrics = report['metrics']
-    #         writer.writerow([i, net, best_val_loss, metrics['mae'], metrics['corr'],
-    #                             metrics['multi_acc'], metrics['bi_acc'], metrics['f1']])
-    #     train_space.pop(0)
-    #     with open('train_space_tmp', 'wb') as file:
-    #         pickle.dump(train_space, file)
-    #     i +=1
-
-        
-        
+    if os.path.isfile('results.csv') == False:
+        with open('train_results.csv', 'w+', newline='') as res:
+                writer = csv.writer(res)
+                writer.writerow(['sample_id', 'arch_code', 'val_loss', 'test_mae', 'test_corr',
+                                'test_multi_acc', 'test_bi_acc', 'test_f1'])
+    i = 0
+    while len(train_space) > 0:
+        net = train_space[0]
+        print('Net', i, ":", net)
+        design = translator(net)
+        best_model, report = Scheme(design)
+        with open('train_results.csv', 'a+', newline='') as res:
+            writer = csv.writer(res)
+            best_val_loss = report['best_val_loss']
+            metrics = report['metrics']
+            writer.writerow([i, net, best_val_loss, metrics['mae'], metrics['corr'],
+                                metrics['multi_acc'], metrics['bi_acc'], metrics['f1']])
+        train_space.pop(0)
+        with open('train_space_tmp', 'wb') as file:
+            pickle.dump(train_space, file)
+        i +=1
