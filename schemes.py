@@ -124,7 +124,7 @@ def Scheme(design):
 
 
 if __name__ == '__main__':
-    # net = [0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0]
+    # net = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1]
     # design = translator(net)
     # best_model, report = Scheme(design)
     train_space = []
