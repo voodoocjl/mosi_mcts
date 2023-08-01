@@ -131,7 +131,7 @@ if __name__ == '__main__':
     if os.path.isfile('train_space_tmp') == True:
         filename = 'train_space_tmp'
     else:
-        filename = 'data/train_space_1'
+        filename = 'data/train_space_5'
 
     with open(filename, 'rb') as file:
         train_space = pickle.load(file)
