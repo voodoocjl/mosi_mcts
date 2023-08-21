@@ -86,17 +86,19 @@ def Scheme(design):
         print("using cpu device")
     train_loader, val_loader, test_loader = MOSIDataLoaders(args)
     model = QNet(args, design).to(args.device)
+    model.load_state_dict(torch.load('classical_weight'), strict= False)
     criterion = nn.L1Loss(reduction='sum')
-    optimizer = optim.Adam([
-        {'params': model.ClassicalLayer_a.parameters()},
-        {'params': model.ClassicalLayer_v.parameters()},
-        {'params': model.ClassicalLayer_t.parameters()},
-        {'params': model.ProjLayer_a.parameters()},
-        {'params': model.ProjLayer_v.parameters()},
-        {'params': model.ProjLayer_t.parameters()},
-        {'params': model.QuantumLayer.parameters(), 'lr': args.qlr},
-        {'params': model.Regressor.parameters()}
-        ], lr=args.clr)
+    # optimizer = optim.Adam([
+    #     {'params': model.ClassicalLayer_a.parameters()},
+    #     {'params': model.ClassicalLayer_v.parameters()},
+    #     {'params': model.ClassicalLayer_t.parameters()},
+    #     {'params': model.ProjLayer_a.parameters()},
+    #     {'params': model.ProjLayer_v.parameters()},
+    #     {'params': model.ProjLayer_t.parameters()},
+    #     {'params': model.QuantumLayer.parameters(), 'lr': args.qlr},
+    #     {'params': model.Regressor.parameters()}
+    #     ], lr=args.clr)
+    optimizer = optim.Adam(model.QuantumLayer.parameters(),lr=args.clr)
     train_loss_list, val_loss_list = [], []
     best_val_loss = 10000
 
