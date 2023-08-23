@@ -138,7 +138,7 @@ if __name__ == '__main__':
     with open(filename, 'rb') as file:
         train_space = pickle.load(file)
 
-    if os.path.isfile('results.csv') == False:
+    if os.path.isfile('train_results.csv') == False:
         with open('train_results.csv', 'w+', newline='') as res:
                 writer = csv.writer(res)
                 writer.writerow(['sample_id', 'arch_code', 'val_loss', 'test_mae', 'test_corr',
