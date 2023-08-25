@@ -98,7 +98,7 @@ def Scheme(design):
     #     {'params': model.QuantumLayer.parameters(), 'lr': args.qlr},
     #     {'params': model.Regressor.parameters()}
     #     ], lr=args.clr)
-    optimizer = optim.Adam(model.QuantumLayer.parameters(),lr=args.clr)
+    optimizer = optim.Adam(model.QuantumLayer.parameters(),lr=args.qlr)
     train_loss_list, val_loss_list = [], []
     best_val_loss = 10000
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     if os.path.isfile('train_space_tmp') == True:
         filename = 'train_space_tmp'
     else:
-        filename = 'data/train_space_5'
+        filename = 'data/train_space_1'
 
     with open(filename, 'rb') as file:
         train_space = pickle.load(file)
@@ -143,7 +143,10 @@ if __name__ == '__main__':
                 writer = csv.writer(res)
                 writer.writerow(['sample_id', 'arch_code', 'val_loss', 'test_mae', 'test_corr',
                                 'test_multi_acc', 'test_bi_acc', 'test_f1'])
-    i = 0
+    else:
+        print('train_results file already exists')
+
+    i = 10000 - len(train_space)
     while len(train_space) > 0:
         net = train_space[0]
         print('Net', i, ":", net)
