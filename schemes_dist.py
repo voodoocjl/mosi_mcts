@@ -12,7 +12,7 @@ from Arguments import Arguments
 import random
 import pickle
 import csv, os
-
+import torch.multiprocessing as mp
 
 def get_param_num(model):
     total_num = sum(p.numel() for p in model.parameters())
@@ -21,11 +21,7 @@ def get_param_num(model):
 
 
 def display(metrics):
-    print("\nTest mae: {}".format(metrics['mae']))
-    # print("Test correlation: {}".format(metrics['corr']))
-    # print("Test multi-class accuracy: {}".format(metrics['multi_acc']))
-    # print("Test binary accuracy: {}".format(metrics['bi_acc']))
-    # print("Test f1 score: {}".format(metrics['f1']))
+    print("\nTest mae: {}".format(metrics['mae']))    
 
 
 def train(model, data_loader, optimizer, criterion, args):
@@ -80,10 +76,7 @@ def Scheme(design):
     np.random.seed(42)
     torch.random.manual_seed(42)
     args = Arguments()
-    if torch.cuda.is_available() and args.device == 'cuda':
-        print("using cuda device")
-    else:
-        print("using cpu device")
+    
     train_loader, val_loader, test_loader = MOSIDataLoaders(args)
     model = QNet(args, design).to(args.device)
     model.load_state_dict(torch.load('classical_weight'), strict= False)
@@ -119,10 +112,37 @@ def Scheme(design):
     print("Running time: %s seconds" % (end - start))
     
     metrics = evaluate(best_model, test_loader, args)
-    display(metrics)
+    # display(metrics)
     report = {'train_loss_list': train_loss_list, 'val_loss_list': val_loss_list,
               'best_val_loss': best_val_loss, 'metrics': metrics}
     return best_model, report
+
+def search(train_space, index):
+    filename = 'train_results_{}.csv'.format(index)
+    if os.path.isfile(filename) == False:
+        with open(filename, 'w+', newline='') as res:
+                writer = csv.writer(res)
+                writer.writerow(['Num', 'sample_id', 'arch_code', 'val_loss', 'test_mae', 'test_corr',
+                                'test_multi_acc', 'test_bi_acc', 'test_f1'])
+   
+    csv_reader = csv.reader(open(filename))
+    i = len(list(csv_reader)) - 1
+    j = index * 1000 + i 
+    
+    while len(train_space) > 0:
+        net = train_space[i]
+        print('Net', j, ":", net)
+        design = translator(net)
+        best_model, report = Scheme(design)
+        with open(filename, 'a+', newline='') as res:
+            writer = csv.writer(res)
+            best_val_loss = report['best_val_loss']
+            metrics = report['metrics']
+            writer.writerow([i, j, net, best_val_loss, metrics['mae'], metrics['corr'],
+                                metrics['multi_acc'], metrics['bi_acc'], metrics['f1']])        
+        j += 1
+        i += 1
+
 
 if __name__ == '__main__':
     # net = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1]
@@ -136,28 +156,33 @@ if __name__ == '__main__':
 
     with open(filename, 'rb') as file:
         train_space = pickle.load(file)
-
-    if os.path.isfile('train_results.csv') == False:
-        with open('train_results.csv', 'w+', newline='') as res:
-                writer = csv.writer(res)
-                writer.writerow(['sample_id', 'arch_code', 'val_loss', 'test_mae', 'test_corr',
-                                'test_multi_acc', 'test_bi_acc', 'test_f1'])
+    
+    num_processes = 10
+    size = int(len(train_space) / num_processes)
+    space = []
+    for i in range(num_processes):
+        space.append(train_space[i*size : (i+1)*size])
+    args = Arguments()
+    if torch.cuda.is_available() and args.device == 'cuda':
+        print("using cuda device")
     else:
-        print('train_results file already exists')
-
-    i = 10000 - len(train_space)
-    while len(train_space) > 0:
-        net = train_space[0]
-        print('Net', i, ":", net)
-        design = translator(net)
-        best_model, report = Scheme(design)
-        with open('train_results.csv', 'a+', newline='') as res:
-            writer = csv.writer(res)
-            best_val_loss = report['best_val_loss']
-            metrics = report['metrics']
-            writer.writerow([i, net, best_val_loss, metrics['mae'], metrics['corr'],
-                                metrics['multi_acc'], metrics['bi_acc'], metrics['f1']])
-        train_space.pop(0)
-        with open('train_space_tmp', 'wb') as file:
-            pickle.dump(train_space, file)
-        i +=1
+        print("using cpu device")
+    with mp.Pool(processes = num_processes) as pool:        
+        pool.starmap(search, [(space[i], i) for i in range(num_processes)])
+    
+    # i = 10000 - len(train_space)
+    # while len(train_space) > 0:
+    #     net = train_space[0]
+    #     print('Net', i, ":", net)
+    #     design = translator(net)
+    #     best_model, report = Scheme(design)
+    #     with open('train_results.csv', 'a+', newline='') as res:
+    #         writer = csv.writer(res)
+    #         best_val_loss = report['best_val_loss']
+    #         metrics = report['metrics']
+    #         writer.writerow([i, net, best_val_loss, metrics['mae'], metrics['corr'],
+    #                             metrics['multi_acc'], metrics['bi_acc'], metrics['f1']])
+    #     train_space.pop(0)
+    #     with open('train_space_tmp', 'wb') as file:
+    #         pickle.dump(train_space, file)
+    #     i +=1
