@@ -149,10 +149,7 @@ if __name__ == '__main__':
     # design = translator(net)
     # best_model, report = Scheme(design)
     train_space = []
-    if os.path.isfile('train_space_tmp') == True:
-        filename = 'train_space_tmp'
-    else:
-        filename = 'data/train_space_1'
+    filename = 'data/train_space_1'
 
     with open(filename, 'rb') as file:
         train_space = pickle.load(file)
@@ -170,19 +167,3 @@ if __name__ == '__main__':
     with mp.Pool(processes = num_processes) as pool:        
         pool.starmap(search, [(space[i], i) for i in range(num_processes)])
     
-    # i = 10000 - len(train_space)
-    # while len(train_space) > 0:
-    #     net = train_space[0]
-    #     print('Net', i, ":", net)
-    #     design = translator(net)
-    #     best_model, report = Scheme(design)
-    #     with open('train_results.csv', 'a+', newline='') as res:
-    #         writer = csv.writer(res)
-    #         best_val_loss = report['best_val_loss']
-    #         metrics = report['metrics']
-    #         writer.writerow([i, net, best_val_loss, metrics['mae'], metrics['corr'],
-    #                             metrics['multi_acc'], metrics['bi_acc'], metrics['f1']])
-    #     train_space.pop(0)
-    #     with open('train_space_tmp', 'wb') as file:
-    #         pickle.dump(train_space, file)
-    #     i +=1
