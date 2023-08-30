@@ -117,7 +117,7 @@ def Scheme(design):
               'best_val_loss': best_val_loss, 'metrics': metrics}
     return best_model, report
 
-def search(train_space, index):
+def search(train_space, index, size):
     filename = 'train_results_{}.csv'.format(index)
     if os.path.isfile(filename) == False:
         with open(filename, 'w+', newline='') as res:
@@ -127,7 +127,7 @@ def search(train_space, index):
    
     csv_reader = csv.reader(open(filename))
     i = len(list(csv_reader)) - 1
-    j = index * 1000 + i 
+    j = index * size + i 
     
     while len(train_space) > 0:
         net = train_space[i]
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     with open(filename, 'rb') as file:
         train_space = pickle.load(file)
     
-    num_processes = 10
+    num_processes = 5
     size = int(len(train_space) / num_processes)
     space = []
     for i in range(num_processes):
@@ -165,5 +165,5 @@ if __name__ == '__main__':
     else:
         print("using cpu device")
     with mp.Pool(processes = num_processes) as pool:        
-        pool.starmap(search, [(space[i], i) for i in range(num_processes)])
+        pool.starmap(search, [(space[i], i, size) for i in range(num_processes)])
     
