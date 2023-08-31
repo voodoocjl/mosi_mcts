@@ -5,8 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 import time
 from sklearn.metrics import accuracy_score, f1_score
-from datasets import MOSIDataLoaders
-from FusionModel import QNet
+from datasets import MOSIDataLoaders, MOSEIDataLoaders
+from FusionModel import QNet, QNet_mosei
 from FusionModel import translator
 from Arguments import Arguments
 import random
@@ -77,9 +77,11 @@ def Scheme(design):
     torch.random.manual_seed(42)
     args = Arguments()
     
-    train_loader, val_loader, test_loader = MOSIDataLoaders(args)
-    model = QNet(args, design).to(args.device)
-    model.load_state_dict(torch.load('classical_weight'), strict= False)
+    # train_loader, val_loader, test_loader = MOSIDataLoaders(args)   #MOSI
+    train_loader, val_loader, test_loader = MOSEIDataLoaders(args)    #MOSEI  
+    # model = QNet(args, design).to(args.device)
+    model = QNet_mosei(args, design).to(args.device)
+    model.load_state_dict(torch.load('classical_weight_MOSEI'), strict= False)
     criterion = nn.L1Loss(reduction='sum')
     # optimizer = optim.Adam([
     #     {'params': model.ClassicalLayer_a.parameters()},
@@ -145,16 +147,16 @@ def search(train_space, index, size):
 
 
 if __name__ == '__main__':
-    # net = [1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1]
+    # net = [0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1]
     # design = translator(net)
     # best_model, report = Scheme(design)
     train_space = []
-    filename = 'data/train_space_1'
+    filename = 'data/train_space_2'
 
     with open(filename, 'rb') as file:
         train_space = pickle.load(file)
     
-    num_processes = 5
+    num_processes = 10
     size = int(len(train_space) / num_processes)
     space = []
     for i in range(num_processes):

@@ -10,9 +10,9 @@ with open('search_space', 'rb') as file:
 # with open('train_space_1', 'wb') as file:
 #     pickle.dump(training_data, file)
 
-training_data = search_space[40000:50000]
+training_data = search_space[50000:60000]
 
-with open('train_space_5', 'wb') as file:
+with open('data/train_space_6', 'wb') as file:
     pickle.dump(training_data, file)
 
 # with open('search_space_shuffle', 'wb') as file:

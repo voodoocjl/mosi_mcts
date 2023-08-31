@@ -7,12 +7,12 @@ class Arguments:
         self.a_hidsize  = 6 #8
         self.v_hidsize  = 3 #4
         self.t_hidsize  = 12 #128
-        # self.a_projsize = 6
-        # self.v_projsize = 3
-        # self.t_projsize = 12
+        self.a_projsize = 6
+        self.v_projsize = 3
+        self.t_projsize = 12
         self.device     = 'cpu'
         self.clr        = 0.005
         self.qlr        = 0.01
         self.epochs     = 3
-        self.batch_size = 32
-        self.test_batch_size = 673
+        self.batch_size = 32     # MOSI: 32, MOSEI:128
+        

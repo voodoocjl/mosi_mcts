@@ -117,3 +117,23 @@ class QNet(nn.Module):
         exp_val = self.QuantumLayer(x_p)
         output = torch.tanh(self.Regressor(exp_val).squeeze(dim=1)) * 3
         return output
+
+class QNet_mosei(nn.Module):
+    def __init__(self, arguments, design):
+        super(QNet_mosei, self).__init__()
+        self.args = arguments
+        self.design = design
+        self.ProjLayer_a = nn.Linear(self.args.a_insize, self.args.a_projsize)
+        self.ProjLayer_v = nn.Linear(self.args.v_insize, self.args.v_projsize)
+        self.ProjLayer_t = nn.Linear(self.args.t_insize, self.args.t_projsize)
+        self.QuantumLayer = QuantumLayer(self.args, self.design)
+        self.Regressor = nn.Linear(self.args.n_qubits, 1)
+
+    def forward(self, x_a, x_v, x_t):
+        a_p = torch.relu(self.ProjLayer_a(x_a))
+        v_p = torch.sigmoid(self.ProjLayer_v(x_v)) * pi
+        t_p = torch.sigmoid(self.ProjLayer_t(x_t)) * pi
+        x_p = torch.cat((a_p, v_p, t_p), 1)
+        exp_val = self.QuantumLayer(x_p)
+        output = torch.tanh(self.Regressor(exp_val).squeeze(dim=1)) * 3
+        return output
