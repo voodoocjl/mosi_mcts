@@ -76,12 +76,17 @@ def Scheme(design):
     np.random.seed(42)
     torch.random.manual_seed(42)
     args = Arguments()
-    
-    # train_loader, val_loader, test_loader = MOSIDataLoaders(args)   #MOSI
-    train_loader, val_loader, test_loader = MOSEIDataLoaders(args)    #MOSEI  
+
+    #MOSI
+    # train_loader, val_loader, test_loader = MOSIDataLoaders(args)   
     # model = QNet(args, design).to(args.device)
+    # model.load_state_dict(torch.load('classical_weight'), strict= False)
+
+    # MOSEI
+    train_loader, val_loader, test_loader = MOSEIDataLoaders(args)         
     model = QNet_mosei(args, design).to(args.device)
     model.load_state_dict(torch.load('classical_weight_MOSEI'), strict= False)
+    
     criterion = nn.L1Loss(reduction='sum')
     # optimizer = optim.Adam([
     #     {'params': model.ClassicalLayer_a.parameters()},
